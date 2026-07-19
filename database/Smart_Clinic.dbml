@@ -1,0 +1,94 @@
+Table Person {
+  PersonID int [pk, increment]
+  NationalID varchar(20) [not null, unique]
+  FirstName varchar(50) [not null]
+  LastName varchar(50) [not null]
+  Gender varchar(10)
+  Phone varchar(20)
+  Email varchar(100)
+  Address varchar(255)
+}
+
+Table Patient {
+  PersonID int [pk, ref: - Person.PersonID]
+  DateOfBirth date [not null]
+  BloodType varchar(5)
+  EmergencyContact varchar(20)
+  InsuranceProvider varchar(100)
+  InsuranceNumber varchar(50)
+}
+
+Table Branch {
+  BranchID int [pk, increment]
+  BranchName varchar(100) [not null, unique]
+  Phone varchar(20)
+  Address varchar(255) [not null]
+  OpeningTime time
+  ClosingTime time
+}
+
+Table Doctor {
+  PersonID int [pk, ref: - Person.PersonID]
+  LicenseNumber varchar(50) [not null, unique]
+  Specialization varchar(100) [not null]
+  HireDate date
+  YearsOfExperience int
+  ConsultationFee decimal(10,2)
+  BranchID int [not null, ref: > Branch.BranchID]
+}
+
+Table Appointment {
+  AppointmentID int [pk, increment]
+  PatientID int [not null, ref: > Patient.PersonID]
+  DoctorID int [not null, ref: > Doctor.PersonID]
+  AppointmentType varchar(30) [not null, note: 'Consultation, Follow-up, or Emergency']
+  AppointmentDate date [not null]
+  AppointmentTime time [not null]
+  Status varchar(20) [not null, note: 'Scheduled, Completed, or Cancelled']
+  Reason varchar(255)
+  Notes text
+}
+
+Table Treatment {
+  TreatmentID int [pk, increment]
+  AppointmentID int [not null, ref: > Appointment.AppointmentID]
+  TreatmentName varchar(100) [not null]
+  Description text
+  Cost decimal(10,2) [not null]
+}
+
+Table Prescription {
+  PrescriptionID int [pk, increment]
+  AppointmentID int [not null, unique, ref: - Appointment.AppointmentID]
+  PrescriptionDate date [not null]
+  Notes text
+}
+
+Table Medicine {
+  MedicineID int [pk, increment]
+  MedicineName varchar(100) [not null, unique]
+  Manufacturer varchar(100)
+  UnitPrice decimal(10,2) [not null]
+}
+
+Table PrescriptionDetail {
+  PrescriptionDetailID int [pk, increment]
+  PrescriptionID int [not null, ref: > Prescription.PrescriptionID]
+  MedicineID int [not null, ref: > Medicine.MedicineID]
+  Dosage varchar(50) [not null]
+  Frequency varchar(50) [not null]
+  Duration varchar(50) [not null]
+
+  indexes {
+    (PrescriptionID, MedicineID) [unique]
+  }
+}
+
+Table Payment {
+  PaymentID int [pk, increment]
+  AppointmentID int [not null, unique, ref: - Appointment.AppointmentID]
+  Amount decimal(10,2) [not null]
+  PaymentMethod varchar(20) [not null, note: 'Cash, Card, or Insurance']
+  PaymentStatus varchar(20) [not null, note: 'Paid, Pending, or Refunded']
+  PaymentDate date
+}
